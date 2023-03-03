@@ -1,18 +1,41 @@
-from flask import render_template, flash, redirect
-from app import app
+from flask import render_template, flash, redirect, url_for
+from flask_login import current_user, login_user, logout_user, login_required
+from app.models import User, Car
 from app.forms import SignUpForm, LoginForm, CarForm
+from app import db, app, login_manager
 
 @app.route('/')
+@login_required
 def index():
-    return render_template('index.jinja', title='Home')
+    cars = Car.query.filter_by(user_id=current_user.id).all()
+    return render_template('index.jinja', title='Home', cars=cars)
 
 @app.route('/login', methods=['GET', 'POST'])
-def show_login_form():
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+
+        login_user(user, remember=form.remember_me.data)
+        flash('Logged in successfully.')
+        return redirect(url_for('index'))
+    return render_template('login.jinja', form=form)
+
+
+@app.route('/signin', methods=['GET', 'POST'])
+def signin():
     login_form = LoginForm()
     if login_form.validate_on_submit():
+        user = User.query.filter_by(username=login_form.username.data).first()
         flash(f'{login_form.username} successfully signed in!')
-        return redirect('/')
-    return render_template('login.jinja', login_form=login_form)
+        return redirect('/login')
+    return render_template('signin.jinja', login_form=login_form)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -27,12 +50,14 @@ def show_car_form():
     car_form = CarForm()
     return render_template('car.jinja', car_form=car_form)
 
-@app.route('/about')
-def about():
-    return render_template('about.jinja')
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
-@app.route('/blog')
-def blog():
-    return render_template('blog.jinja')
+
+
+
+
+
 
 

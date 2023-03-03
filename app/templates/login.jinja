@@ -2,31 +2,22 @@
 
 {% block content %}
     <h2>Log In</h2>
-    <form action="" method="post">
-        {{ login_form.hidden_tag() }}
-        <p>
+    <form method="POST" action="{{ url_for('login') }}">
+    {{ login_form.hidden_tag() }}
+    <div class="form-group">
         {{ login_form.username.label }}
-        {{ login_form.username(size=32) }}
-        </p>
-        
-        <p>
-        {{ login_form.email.label }} <br>
-        {{ login_form.email(size=32) }}
-        </p>
+        {{ login_form.username(class='form-control') }}
+    </div>
+    <div class="form-group">
+        {{ login_form.password.label }}
+        {{ login_form.password(class='form-control') }}
+    </div>
+    <div class="form-group">
+        {{ login_form.remember(class='form-check-input') }}
+        {{ login_form.remember.label(class='form-check-label') }}
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
 
-        <p>
-        {{ login_form.password.label }} <br>
-        {{ login_form.password(size=32) }}
-        </p>
-    
-        <p>
-        {{ login_form.confirm_password.label }}
-        {{ login_form.confirm_password(size=32) }}
-        </p>
-        
-        <p>
-        {{ login_form.submit(class='btn btn-primary') }}
-        </p>
-    </form>
 
 {% endblock %}
